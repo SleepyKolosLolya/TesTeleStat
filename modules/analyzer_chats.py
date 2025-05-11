@@ -32,6 +32,8 @@ def analyze_messages(input_file, config, current_texts, is_personal_chat, use_st
     non_consecutive_counts = collections.Counter()
     non_consecutive_symbols = collections.Counter()
     user_ids = {}
+    # Add a dictionary to track the last message date for each user
+    user_last_message_dates = {}
     prev_user = None
     prev_time = None
     words = []
@@ -171,6 +173,11 @@ def analyze_messages(input_file, config, current_texts, is_personal_chat, use_st
                 try:
                     date_time = datetime.datetime.fromisoformat(message_date)
                     date_time += time_offset_delta
+                    
+                    # Update the last message date for this user
+                    if user not in user_last_message_dates or date_time > user_last_message_dates[user]:
+                        user_last_message_dates[user] = date_time
+                    
                     if start_date and end_date:
                         if not (start_date.date() <= date_time.date() <= end_date.date()):
                             prev_user = user
@@ -279,6 +286,7 @@ def analyze_messages(input_file, config, current_texts, is_personal_chat, use_st
         'non_consecutive_counts': non_consecutive_counts,
         'non_consecutive_symbols': non_consecutive_symbols,
         'user_ids': user_ids,
+        'user_last_message_dates': user_last_message_dates,  # Add the user last message dates to results
         'first_date': first_date,
         'last_date': last_date,
         'avg_message_length': avg_message_length,
